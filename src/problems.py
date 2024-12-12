@@ -6,9 +6,24 @@ import scipy as sp
 
 
 class Problems:
-    def __init__(self, m, n):
+    def __init__(self, m, n, random_seed=42):
+        """
+        Generate an Absolute Value Equation problem
+
+            $$ Ax + B|x| = c $$
+
+        with matrix $A$ of size (m, n), matrix $B$ of size (m, n),
+        vector $c$ of size m, and ground truth solution of size m.
+
+        Arguments
+
+        - `m`           - Problem size parameter.
+        - `n`           - Problem size parameter.
+        - `random_seed` - Random seed for random generator.
+        """
         self.m = m
         self.n = n
+        self.rng = np.random.default_rng(random_seed)
 
     def problem1(self, alpha=0):
         """
@@ -20,18 +35,18 @@ class Problems:
 
         Returns
 
-        - `mat_A` - Matrix $A$ for AVE.
-        - `mat_B` - Matrix $B$ for AVE.
-        - `vec_c` - Vector $c$ for AVE.
+        - `mat_A` - Matrix $A$ in AVE.
+        - `mat_B` - Matrix $B$ in AVE.
+        - `vec_c` - Vector $c$ in AVE.
         - `sol_x` - Ground truth solution.
         """
-        mat_A = -10 + 20 * np.random.rand(self.m, self.n)
-        mat_A /= min(sp.linalg.svdvals(mat_A)) * np.random.rand()
+        mat_A = -10 + 20 * self.rng.random(size=(self.m, self.n))
+        mat_A /= min(sp.linalg.svdvals(mat_A)) * self.rng.random()
         mat_B = -np.eye(self.m, self.n)
 
-        sol_x = -1 + 2 * np.random.rand(self.n)
+        sol_x = -1 + 2 * self.rng.random(size=self.n)
         if alpha:
-            sol_x *= 10 ** (alpha * np.random.rand(self.n))
+            sol_x *= 10 ** (alpha * self.rng.random(size=self.n))
 
         vec_c = mat_A @ sol_x + mat_B @ abs(sol_x)
 
