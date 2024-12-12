@@ -43,15 +43,19 @@ class MAP:
 
         - `vec_x` - Solution vector of size (n,).
         """
-        n = mat_A.shape[1]
-        # mat_I = np.eye(n)  # -mat_B
+        m, n = mat_A.shape
         mat_T = np.hstack([mat_A + mat_B, -mat_A + mat_B])
+        cbar = np.sqrt(2) * vec_c
+
+        # check full rank case by Lemma 2.8
+        case_full_rank = False
+        if m == n and np.allclose(mat_B, -np.eye(3)):
+            case_full_rank = True
 
         # pre-compute cholesky factor for efficiency (page. 29)
         chol_factor, chol_bool = sp.linalg.cho_factor(
             2 * (mat_A @ mat_A.T + mat_B @ mat_B.T)
         )
-        cbar = np.sqrt(2) * vec_c
 
         # initialization
         if initial is None:
@@ -75,14 +79,18 @@ class MAP:
             # projection onto C1 (Proposition 2.1)
             # solve `vec_z` by Equation (4.1)
             vec_z = sp.linalg.cho_solve((chol_factor, chol_bool), mat_T @ pc2_w - cbar)
-            # compute `mat_T.T @ vec_z` by `vec_p` for efficiency (page. 29)
-            vec_p = mat_A.T @ vec_z
-            pc1_w = pc2_w - np.hstack([vec_p - vec_z, -vec_p - vec_z])
+
+            if case_full_rank:
+                # compute `mat_T.T @ vec_z` by `vec_p` for efficiency (page. 29)
+                vec_p = mat_A.T @ vec_z
+                pc1_w = pc2_w - np.hstack([vec_p - vec_z, -vec_p - vec_z])
+            else:
+                pc1_w = pc2_w - mat_T.T @ vec_z 
 
             vec_x = (pc1_w[:n] - pc1_w[n:]) / np.sqrt(2)
 
             # stopping criteria
-            cost = np.linalg.norm(mat_A @ vec_x - np.abs(vec_x) - vec_c)
+            cost = np.linalg.norm(mat_A @ vec_x + mat_B @ np.abs(vec_x) - vec_c)
             if (
                 cost < self.tol
                 or abs(cost - prev_cost) / max(prev_cost, 1e-7) < self.rel_tol
