@@ -1,3 +1,6 @@
+# Copyright 2024 Bang-Shien Chen.
+# All rights reserved. See LICENSE for the license information.
+
 from src.problems import Problems
 from src.solver import MAP
 
@@ -13,5 +16,5 @@ mat_A, mat_B, vec_c, gtruth = prob.problem1()  # change problem index here
 print("Ground truth solution:\n", gtruth, end="\n\n")
 
 model = MAP(MAX_ITER, TOL, VERBOSE)
-sol = model.solve(mat_A, vec_c)
+sol = model.solve(mat_A, mat_B, vec_c)
 print("MAP solution:\n", sol, end="\n\n")
