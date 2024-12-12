@@ -1,3 +1,6 @@
+# Copyright 2024 Bang-Shien Chen.
+# All rights reserved. See LICENSE for the license information.
+
 import numpy as np
 import scipy as sp
 
@@ -17,13 +20,18 @@ class MAP:
         self.tol = tolerance
         self.verbose = verbose
 
-    def solve(self, mat_A, vec_c, initial=None):
+    def solve(self, mat_A, mat_B, vec_c, initial=None):
         """
-        Solve the problem using the Method of Alternating Projections.
+        Solve an Absolute Value Equation
+
+            $$ Ax + B|x| = c $$
+
+        using the Method of Alternating Projections.
 
         Arguments
 
         - `mat_A`   - Matrix $A$ of size (m, n).
+        - `mat_B`   - Matrix $B$ of size (m, n).
         - `vec_c`   - Vector $c$ of size (m,).
         - `initial` - Initial guess vector of size (2n,).
 
@@ -32,11 +40,13 @@ class MAP:
         - `vec_x` - Solution vector of size (n,).
         """
         n = mat_A.shape[1]
-        mat_I = np.eye(n)  # -mat_B
-        mat_T = np.hstack([mat_A - mat_I, -mat_A - mat_I])
+        # mat_I = np.eye(n)  # -mat_B
+        mat_T = np.hstack([mat_A + mat_B, -mat_A + mat_B])
 
         # pre-compute cholesky factor for efficiency (page. 29)
-        chol_factor, chol_bool = sp.linalg.cho_factor(2 * (mat_A @ mat_A.T + mat_I))
+        chol_factor, chol_bool = sp.linalg.cho_factor(
+            2 * (mat_A @ mat_A.T + mat_B @ mat_B.T)
+        )
         cbar = np.sqrt(2) * vec_c
 
         # initialization
@@ -60,7 +70,7 @@ class MAP:
             # Projection onto C1 (Proposition 2.1)
             # solve `vec_z` by Equation (4.1)
             vec_z = sp.linalg.cho_solve((chol_factor, chol_bool), mat_T @ pc2_w - cbar)
-            # compute `mat_T.T @ vec_z` by `vec_p` for computational efficiency (page. 29)
+            # compute `mat_T.T @ vec_z` by `vec_p` for efficiency (page. 29)
             vec_p = mat_A.T @ vec_z
             pc1_w = pc2_w - np.hstack([vec_p - vec_z, -vec_p - vec_z])
 
@@ -71,8 +81,12 @@ class MAP:
                 if self.verbose:
                     print("iterations: {}".format(i + 1))
                     print("error: {:.5f}".format(err), end="\n\n")
-                break
+                return vec_x
 
             vec_w = pc1_w
+
+        if self.verbose:
+            print("reached maximum iteration: {}".format(i + 1))
+            print("error: {:.5f}".format(err), end="\n\n")
 
         return vec_x
