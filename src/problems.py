@@ -13,7 +13,7 @@ class Problems:
             $$ Ax + B|x| = c $$
 
         with matrix $A$ of size (m, n), matrix $B$ of size (m, n),
-        vector $c$ of size m, and ground truth solution of size m.
+        vector $c$ of size m, and ground truth solution of size n.
 
         Arguments
 
@@ -47,6 +47,28 @@ class Problems:
         sol_x = -1 + 2 * self.rng.random(size=self.n)
         if alpha:
             sol_x *= 10 ** (alpha * self.rng.random(size=self.n))
+
+        vec_c = mat_A @ sol_x + mat_B @ abs(sol_x)
+
+        return mat_A, mat_B, vec_c, sol_x
+
+    def problem2(self):
+        """
+        Problem 2 (Example 4.2)
+
+        Returns
+
+        - `mat_A` - Matrix $A$ in AVE.
+        - `mat_B` - Matrix $B$ in AVE.
+        - `vec_c` - Vector $c$ in AVE.
+        - `sol_x` - Ground truth solution.
+        """
+        assert self.m == self.n, "m and n must have the same size for this problem"
+        vec_A = self.rng.normal(size=self.n)[None, :]
+        mat_A = vec_A * vec_A.T
+        mat_B = -np.eye(self.n)
+
+        sol_x = self.rng.normal(size=self.n)
 
         vec_c = mat_A @ sol_x + mat_B @ abs(sol_x)
 

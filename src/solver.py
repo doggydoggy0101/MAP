@@ -6,18 +6,22 @@ import scipy as sp
 
 
 class MAP:
-    def __init__(self, max_iteration, tolerance, verbose=False):
+    def __init__(
+        self, max_iteration, tolerance, relative_tolerance=1e-6, verbose=False
+    ):
         """
         Method of Alternating Projections.
 
         Arguments
 
-        - `max_iteration` - Maximum number of iterations.
-        - `tolerance`     - Convergence tolerance for the error.
-        - `verbose`       - Verbosity.
+        - `max_iteration`      - Maximum number of iterations.
+        - `tolerance`          - Absolute tolerance for the error.
+        - `relative_tolerance` - Relative tolerance for early stop.
+        - `verbose`            - Verbosity.
         """
         self.max_iter = max_iteration
         self.tol = tolerance
+        self.rel_tol = relative_tolerance
         self.verbose = verbose
 
     def solve(self, mat_A, mat_B, vec_c, initial=None):
@@ -58,6 +62,7 @@ class MAP:
             ), "dimension of initial guess must be {}".format(2 * n)
             vec_w = initial
 
+        prev_cost = 1e10
         for i in range(self.max_iter):
             # projection onto C2 (Proposition 2.2)
             vec_u = vec_w[:n]  # first-half of `vec_w`
@@ -77,14 +82,18 @@ class MAP:
             vec_x = (pc1_w[:n] - pc1_w[n:]) / np.sqrt(2)
 
             # stopping criteria
-            err = np.linalg.norm(mat_A @ vec_x - np.abs(vec_x) - vec_c)
-            if err < self.tol:
+            cost = np.linalg.norm(mat_A @ vec_x - np.abs(vec_x) - vec_c)
+            if (
+                cost < self.tol
+                or abs(cost - prev_cost) / max(prev_cost, 1e-7) < self.rel_tol
+            ):
                 break
 
             vec_w = pc1_w
+            prev_cost = cost
 
         if self.verbose:
             print("iterations: {}".format(i + 1))
-            print("error: {:.5f}".format(err), end="\n\n")
+            print("error: {:.5f}".format(cost), end="\n\n")
 
         return vec_x
