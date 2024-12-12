@@ -59,7 +59,7 @@ class MAP:
             vec_w = initial
 
         for i in range(self.max_iter):
-            # Projection onto C2 (Proposition 2.2)
+            # projection onto C2 (Proposition 2.2)
             vec_u = vec_w[:n]  # first-half of `vec_w`
             vec_v = vec_w[n:]  # second-half of `vec_w`
             mask = (vec_u < 0) & (vec_v < 0)  # both negative
@@ -67,7 +67,7 @@ class MAP:
             vec_v = np.where(mask, 0, np.where(vec_v >= vec_u, vec_v, 0))
             pc2_w = np.hstack([vec_u, vec_v])
 
-            # Projection onto C1 (Proposition 2.1)
+            # projection onto C1 (Proposition 2.1)
             # solve `vec_z` by Equation (4.1)
             vec_z = sp.linalg.cho_solve((chol_factor, chol_bool), mat_T @ pc2_w - cbar)
             # compute `mat_T.T @ vec_z` by `vec_p` for efficiency (page. 29)
@@ -76,17 +76,15 @@ class MAP:
 
             vec_x = (pc1_w[:n] - pc1_w[n:]) / np.sqrt(2)
 
+            # stopping criteria
             err = np.linalg.norm(mat_A @ vec_x - np.abs(vec_x) - vec_c)
             if err < self.tol:
-                if self.verbose:
-                    print("iterations: {}".format(i + 1))
-                    print("error: {:.5f}".format(err), end="\n\n")
-                return vec_x
+                break
 
             vec_w = pc1_w
 
         if self.verbose:
-            print("reached maximum iteration: {}".format(i + 1))
+            print("iterations: {}".format(i + 1))
             print("error: {:.5f}".format(err), end="\n\n")
 
         return vec_x
