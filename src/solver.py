@@ -85,7 +85,7 @@ class MAP:
                 vec_p = mat_A.T @ vec_z
                 pc1_w = pc2_w - np.hstack([vec_p - vec_z, -vec_p - vec_z])
             else:
-                pc1_w = pc2_w - mat_T.T @ vec_z 
+                pc1_w = pc2_w - mat_T.T @ vec_z
 
             vec_x = (pc1_w[:n] - pc1_w[n:]) / np.sqrt(2)
 
