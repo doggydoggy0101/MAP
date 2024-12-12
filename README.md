@@ -1,4 +1,4 @@
-# MAP
+# Method of Alternating Projections
 [![Python Formatter](https://img.shields.io/badge/Python_Formatter-ruff-black?style=flat-square)](https://github.com/astral-sh/ruff)
 
 Unofficial implementation of "Method of alternating projections for the general absolute value equation". Please refer to the paper:
