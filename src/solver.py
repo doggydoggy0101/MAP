@@ -49,7 +49,7 @@ class MAP:
 
         # check full rank case by Lemma 2.8
         case_full_rank = False
-        if m == n and np.allclose(mat_B, -np.eye(3)):
+        if m == n and np.allclose(mat_B, -np.eye(n)):
             case_full_rank = True
 
         # pre-compute cholesky factor for efficiency (page. 29)
