@@ -1,0 +1,56 @@
+name: check-build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build-cpp:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: install build tools and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y g++ build-essential cmake
+          sudo apt install -y libeigen3-dev 
+      - name: build
+        run: |
+          mkdir build 
+          cd build 
+          cmake .. 
+          make -j$(nproc)
+
+  build-python:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: install build tools and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y g++ build-essential cmake
+          sudo apt install -y libeigen3-dev 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"  # latest python3 
+      - name: install python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install numpy
+      - name: build
+        run: |
+          mkdir build
+          cd build 
+          cmake .. -DBUILD_PYTHON=ON 
+          make -j$(nproc)
+          cd python && pip install .

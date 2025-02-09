@@ -1,0 +1,17 @@
+# c++
+build/
+
+# python
+__pycache__/
+
+# IDEs
+.vscode
+
+# environments
+.venv
+
+# ruff
+.ruff_cache
+
+# macOS
+.DS_Store
